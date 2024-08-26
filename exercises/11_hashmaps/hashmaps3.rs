@@ -17,7 +17,7 @@ struct TeamScores {
 
 fn build_scores_table(results: &str) -> HashMap<&str, TeamScores> {
     // The name of the team is the key and its associated struct is the value.
-    let mut scores = HashMap::new();
+    let mut scores: HashMap<&str, TeamScores> = HashMap::new();
 
     for line in results.lines() {
         let mut split_iterator = line.split(',');
@@ -27,10 +27,31 @@ fn build_scores_table(results: &str) -> HashMap<&str, TeamScores> {
         let team_1_score: u8 = split_iterator.next().unwrap().parse().unwrap();
         let team_2_score: u8 = split_iterator.next().unwrap().parse().unwrap();
 
+        scores.entry(team_1_name).or_insert(TeamScores {
+            goals_scored: 0, 
+            goals_conceded: 0} );
+
+
+        scores.entry(team_2_name).or_insert(TeamScores {
+            goals_scored: 0, 
+            goals_conceded: 0} );
+
         // TODO: Populate the scores table with the extracted details.
         // Keep in mind that goals scored by team 1 will be the number of goals
         // conceded by team 2. Similarly, goals scored by team 2 will be the
         // number of goals conceded by team 1.
+        let team_1_prev_scored  = scores.get(team_1_name).unwrap().goals_scored;
+        let team_1_prev_conceded  =scores.get(team_1_name).unwrap().goals_conceded;
+        let team_2_prev_scored  =scores.get(team_2_name).unwrap().goals_scored;
+        let team_2_prev_conceded  =scores.get(team_2_name).unwrap().goals_conceded;
+
+        scores.insert(team_1_name, TeamScores {
+            goals_scored: (team_1_prev_scored + team_1_score), 
+            goals_conceded: (team_1_prev_conceded + team_2_score)} );
+
+        scores.insert(team_2_name, TeamScores {
+            goals_scored: (team_2_prev_scored + team_2_score), 
+            goals_conceded: (team_2_prev_conceded + team_1_score)} );
     }
 
     scores
